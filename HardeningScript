@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Set the color variable
+cyan='\033[0;36m'
+# Clear the color after that
+clear='\033[0m'
+
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
+
+ #Ensure your system in updated
+printf "${cyan}Updating${clear}"
+   apt-get --yes update
+   apt-get --yes upgrade
+   apt-get --yes autoremove
+   apt-get --yes autoclean
+echo ""
+#Install chkrootkit
+printf "${cyan}Installing chkrootkit${clear}"
+   apt-get --yes install chkrootkit
+echo ""
+#Restrict ssh Root access
+printf "${cyan}Restricting ssh root permissions${clear}"
+#sudo sh -c 'echo "PermitRootLogin no" >> /etc/ssh/ssh_config'
+echo ""
+#Install logwatch reporter
+printf "${cyan}Installing LogWatch${clear}"
+   apt-get --yes install logwatch
+echo ""
+#Update some firewall rules, in this case UFW
+printf "${cyan}Updating UFW firewall rules${clear}"
+echo ""
+   ufw allow ssh
+   ufw allow http
+   ufw deny 23
+   ufw default deny
+   ufw enable
+printf "${cyan}Disabling Avahi${clear}"
+echo ""
+#The avahi daemon allows applications to be discoverable and to broadcast their function.
+#On individual servers or small clusters this is not needed and just adds noise. Disable this to add more security.
+#Disable this function for larger clusters with a # at beginning of next line
+   update-rc.d avahi-daemon disable
+printf "${cyan}Purging Whoopsie${clear}"
+echo ""
+#whoopsie is a error log reporter and not needed strictly speaking
+#is also a target for attacks CVE-2019-7307, CVE-2019-11476, CVE-2019-11481, CVE-2019-11484, CVE-2019-15790
+#and therefore you are more than likely safer simply purging it
+   apt-get --yes purge whoopsie
+
+echo ""
+printf "${cyan}Summary${clear}"
+echo ""
+echo "Updated system"
+echo "Installed chkrootkit"
+echo "Hardened ssh"
+echo "Installed LogWatch"
+echo "Disabled Avahi Daemon"
+echo "Purged Whoopsie reporter"
+echo ""
+printf "${cyan}Further steps may need to be taken in .config files${clear}"
+echo ""
