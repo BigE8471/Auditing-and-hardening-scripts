@@ -1,0 +1,62 @@
+BootCon Auditing Script
+#!/bin/bash
+
+# Set the color variable
+cyan='\033[0;36m'
+# Clear the color after that
+clear='\033[0m'
+
+#This script will give you information on your system
+
+if [ "$UID" -ne 0 ]
+   then echo "Run as root to coninue"
+   exit
+fi
+
+printf "${cyan}Hello, today is${clear}:" ; 'date'
+printf "${cyan}Short System Audit Results${clear} \n"
+echo ""
+printf "${cyan}Currently logged as-${clear}"
+   whoami
+echo ""
+printf "${cyan}Linux Distribution Info${clear}"
+echo ""
+   lsb_release -a
+echo ""
+printf "${cyan}Machine Type Info${clear}:"
+printf "$MACHTYPE"
+echo ""
+printf "\n${cyan}Uname info${clear}: $(uname -a) \n"
+echo ""
+printf "${cyan}IP Info${clear}: $(ip addr | head -9 | tail -1) \n"
+echo ""
+printf "${cyan}Hostname${clear}: $(hostname -s) \n"
+echo ""
+printf "${cyan}DNS Servers${clear}: "
+   cat /etc/resolv.conf
+printf "\n${cyan}Memory Info${clear}:" ; echo "" ; 'free'
+printf "\n${cyan}\nCPU Info${clear}:"
+echo ""
+   lscpu |grep CPU
+printf "${cyan}\nDisk Usage${clear}:"
+echo ""
+   df -H | head -2
+printf "${cyan}\nWho is logged in${clear}" 
+cho ""
+   (who -a)
+printf "\n${cyan}Top 10 Processes${clear}:"
+echo ""
+   ps aux -m | awk {'print $1, $2, $3, $4, $11'} | head -11
+printf "${cyan}All Open Ports${clear}"
+echo ""
+#looks for open ports
+   netstat -antp
+echo ""
+printf "${cyan}Installed Packages${clear}"
+echo ""
+   apt-cache pkgnames > installed_packages.txt
+echo "List exported to installed_packages.txt"
+echo ""
+#looks for accounts that don't have a password
+printf "${cyan}Accounts without a password${clear} \n"
+   sudo cat /etc/shadow |awk -F: '($2==""){print $1}'
